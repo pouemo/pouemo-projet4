@@ -1,0 +1,135 @@
+service:
+  name: serverless-todo-app
+
+plugins:
+  - serverless-webpack
+  - serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-west-3'}
+
+environment:
+  TODOS_TABLE:Todos-${self:provider.stage}
+  USERS_TABLE:Users-${self:provider.stage}
+
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Pouemo API
+        description: Serverless application for todo
+    models:
+      - name: TodoRequest
+        content: application/json
+        schema: ${file(models/create-todo-request.json)}      
+
+iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - dynamodb:Scan
+       - dynamodb:PutItem
+    Resources: arn:aws:dynamodb:${self:provider.region}:*table/${self:provider.environment.TODOS_TABLE}
+    
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+       - dynamodb:PutItem
+    Resources: arn:aws:dynamodb:${self:provider.region}:*table/${self:provider.environment.USERS_TABLE}  
+
+functions:
+
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
+
+  # TODO: Configure this function
+  GetTodos:
+    handler: src/lambda/http/getTodos.handler
+    events:
+      - http:
+          method: get
+          path: todos
+
+  # TODO: Configure this function
+  GetTodos:
+  CreateTodo:
+    handler: src/lambda/http/createTodo.handler
+    events:
+      - http:
+          method: post
+          path: todos
+          cors: true
+          validatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new todo
+            description: Create a new todo
+            requestModels:
+              'application/json': TodoRequest
+
+
+  # TODO: Configure this function
+  UpdateTodo:
+    handler: src/lambda/http/updateTodo.handler
+    events:
+      - http:
+          method: patch
+          path: todos/{todoId}
+          cors: true
+  
+  # TODO: Configure this function
+  DeleteTodo:
+    handler: src/lambda/http/deleteTodo.handler
+    events:
+      - http:
+          method: delete
+          path: todos/{todoId}
+          cors: true
+
+  # TODO: Configure this function
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/attachment
+          cors: true
+
+resources:
+  Resources:
+    # TODO: Add any necessary AWS resources
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::ResquestValidator
+      Properties:
+        name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidatorRequestBody: true
+        ValidatorRequestParameters: false  
+
+    TodosDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: todoId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: todoId
+            keyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.TODOS_TABLE}
+
+    UserDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: todoId
+            keyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.TODOS_TABLE}    
