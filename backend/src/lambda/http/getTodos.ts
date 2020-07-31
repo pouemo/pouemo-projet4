@@ -1,19 +1,22 @@
 import 'source-map-support/register'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
-import * as aws from 'aws-sdk'
+
+import * as AWS from 'aws-sdk'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
+
+const todosTable = process.env.TODOS_TABLE
 
 
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // TODO: Get all TODO items for a current user
-  console.log('Caller event ', event)
 
-  const userId = '1'
+  console.log('Caller event', event)
+  const userId = event.pathParameters.userId
 
-  const todos = await getTodos(userId)
+  const todos = await getImagesPerUser(userId)
 
   return{
     statusCode:200,
@@ -26,9 +29,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   }
 }
 
-async function getTodos(userId: string){
+async function getImagesPerUser(userId: string){
   const result = await docClient.query({
-    TableName:'todos',
+    TableName: todosTable,
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues:{
       ':userId': userId
