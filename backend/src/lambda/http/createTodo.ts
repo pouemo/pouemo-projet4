@@ -9,13 +9,6 @@ const docClient = new AWS.DynamoDB.DocumentClient()
 
 const todosTable = process.env.TODOS_TABLE
 
-const s3 = new AWS.S3({
-  signatureVersion: 'v4'
-})
-
-const bucketName = process.env.IMAGES_S3_BUCKET
-const urlExpiration = process.env.SIGNED_URL_EXPIRATION
-
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log('Processing event: ', event)
   const newTodo: CreateTodoRequest = JSON.parse(event.body)

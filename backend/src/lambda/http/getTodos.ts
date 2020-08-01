@@ -14,9 +14,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   // TODO: Get all TODO items for a current user
 
   console.log('Caller event', event)
-  const userId = event.pathParameters.userId
+  const userId = event.pathParameters.userID
 
-  const todos = await getImagesPerUser(userId)
+  const todos = await getTodosPerUser(userId)
 
   return{
     statusCode:200,
@@ -29,7 +29,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   }
 }
 
-async function getImagesPerUser(userId: string){
+async function getTodosPerUser(userId: string){
   const result = await docClient.query({
     TableName: todosTable,
     KeyConditionExpression: 'userId = :userId',

@@ -18,9 +18,9 @@ provider:
     USERS_TABLE: Users-${self:provider.stage}
     IMAGE_ID_INDEX: ImageIdIndex
     CONNECTIONS_TABLE: Connections-${self:provider.stage}
-    IMAGES_S3_BUCKET: serverless-udagram-images-${self:provider.stage}
+    IMAGES_S3_BUCKET: serverless-pouemo-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-${self:provider.stage}
+    THUMBNAILS_S3_BUCKET: serverless-pouemo-thumbnail-${self:provider.stage}
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH_0_SECRET_FIELD: auth0Secret
 
@@ -74,10 +74,10 @@ custom:
         version: v1.0.0
         title: Pouemo API
         description: Serverless application for todo
-    models:
-      - name: TodoRequest
-        content: application/json
-        schema: ${file(src/models/create-todo-request.json)}        
+#     models:
+#       - name: TodoRequest
+#         content: application/json
+#         schema: ${file(src/models/create-todo-request.json)}        
 
 functions:
 
@@ -87,10 +87,10 @@ functions:
   # TODO: Configure this function
   GetTodos:
     handler: src/lambda/http/getTodos.handler
-    events:
-      - http:
-          method: get
-          path: todos/{userId}
+    # events:
+    #   - http:
+    #       method: get
+    #       path: todos/{userID}
 
   # TODO: Configure this function Create group
   CreateTodo:
@@ -100,13 +100,13 @@ functions:
           method: post
           path: todo
           cors: true
-          authorizer: Auth
-          validatorName: RequestBodyValidator
-          documentation:
-            summary: Create a new todo
-            description: Create a new todo
-            requestModels:
-              'application/json': TodoRequest
+          # authorizer: Auth
+          # validatorName: RequestBodyValidator
+          # documentation:
+          #   summary: Create a new todo
+          #   description: Create a new todo
+          #   requestModels:
+          #     'application/json': TodoRequest
 
 
   # TODO: Configure this function Update groupe
@@ -167,14 +167,14 @@ resources:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: id
             AttributeType: S
           - AttributeName: timestamp
             AttributeType: S
           - AttributeName: imageId
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: timestamp
             KeyType: RANGE
